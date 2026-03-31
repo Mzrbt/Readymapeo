@@ -1,5 +1,6 @@
 package com.dev.readymapeo
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,24 +21,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.dev.readymapeo.database.DatabaseHelper
+import com.dev.readymapeo.ui.composable.ClubListScreen
 import com.dev.readymapeo.ui.theme.ReadymapeoTheme
+import com.dev.readymapeo.ui.viewmodels.ClubViewModel
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        var database: DatabaseHelper = DatabaseHelper(this)
+        var viewModel : ClubViewModel = ClubViewModel(database)
         enableEdgeToEdge()
+
         setContent {
+
             ReadymapeoTheme {
-                ReadymapeoApp()
+                ReadymapeoApp(viewModel)
             }
         }
     }
 }
 
-@PreviewScreenSizes
+
 @Composable
-fun ReadymapeoApp() {
+fun ReadymapeoApp(viewModel: ClubViewModel) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -57,10 +68,7 @@ fun ReadymapeoApp() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+            ClubListScreen(viewModel, Modifier.padding(innerPadding))
         }
     }
 }
