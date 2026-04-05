@@ -22,6 +22,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.dev.readymapeo.database.DatabaseHelper
+import com.dev.readymapeo.ui.composable.AddClubForm
+import com.dev.readymapeo.ui.composable.AuthForm
 import com.dev.readymapeo.ui.composable.ClubListScreen
 import com.dev.readymapeo.ui.theme.ReadymapeoTheme
 import com.dev.readymapeo.ui.viewmodels.ClubViewModel
@@ -67,9 +69,12 @@ fun ReadymapeoApp(viewModel: ClubViewModel) {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            ClubListScreen(viewModel, Modifier.padding(innerPadding))
+        when (currentDestination) {
+            AppDestinations.HOME -> ClubListScreen(viewModel)
+            AppDestinations.FAVORITES -> AddClubForm(viewModel)
+            AppDestinations.PROFILE -> AuthForm(viewModel)
         }
+
     }
 }
 

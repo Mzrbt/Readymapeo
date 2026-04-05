@@ -6,6 +6,5 @@ data class Club(
     val street: String,
     val city: String,
     val postalCode: String,
-    val description: String,
-    var isDirty: Int = 0
+    val description: String
 )

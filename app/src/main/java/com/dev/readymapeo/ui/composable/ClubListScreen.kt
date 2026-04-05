@@ -36,7 +36,7 @@ fun ClubListScreen(viewModel: ClubViewModel, modifier: Modifier = Modifier) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(club.name)
                             Text("${club.postalCode} ${club.city}")
-                            if (club.isDirty == 1) Text("Non synchronisé", color = Color.Red)
+
                         }
                     }
                 }

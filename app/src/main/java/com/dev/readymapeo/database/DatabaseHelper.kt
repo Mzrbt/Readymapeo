@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.dev.readymapeo.models.Club
 
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", null, 1) {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", null, 3) {
 
     private val TABLE_CLUBS = "clubs"
     private val COL_ID = "club_id"
@@ -47,7 +47,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", n
             put(COL_CITY, club.city)
             put(COL_POSTAL, club.postalCode)
             put(COL_DESC, club.description)
-            put(COL_IS_DIRTY, club.isDirty)
         }
         db.insertWithOnConflict(TABLE_CLUBS, null, values, SQLiteDatabase.CONFLICT_REPLACE)
         db.close()
@@ -61,7 +60,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", n
             do {
                 list.add(Club(
                     cursor.getInt(0), cursor.getString(1), cursor.getString(2),
-                    cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getInt(6)
+                    cursor.getString(3), cursor.getString(4), cursor.getString(5)
                 ))
             } while (cursor.moveToNext())
         }
