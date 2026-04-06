@@ -14,9 +14,8 @@ import kotlinx.coroutines.withContext
 
 class ClubViewModel(private val dbHelper: DatabaseHelper) : ViewModel() {
     var clubs = mutableStateListOf<Club>()
-
     var userToken: String? = null
-    var isLoggedIn = mutableStateOf<Boolean>(false)
+    var isLoggedIn = mutableStateOf(false)
     var loginError = mutableStateOf<String?>(null)
 
     init {
@@ -30,6 +29,15 @@ class ClubViewModel(private val dbHelper: DatabaseHelper) : ViewModel() {
 
     fun sync() {
         viewModelScope.launch(Dispatchers.IO) {
+
+            val token = userToken
+            if (token != null) {
+                ClubDownloader().syncDirtyClubs(dbHelper, token)
+            } else {
+                Log.w("ClubViewModel", "Sync dirty ignoré : non connecté")
+            }
+
+
             val success = ClubDownloader().getClubAndAdd(dbHelper)
             if (success) {
                 withContext(Dispatchers.Main) { loadFromLocal() }
@@ -37,14 +45,10 @@ class ClubViewModel(private val dbHelper: DatabaseHelper) : ViewModel() {
         }
     }
 
-
     fun getToken(email: String, mdp: String) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.d("Login", "Tentative de connexion pour : $email")
-
-            val downloader = ClubDownloader()
-            val token = downloader.login(email, mdp)
-
+            val token = ClubDownloader().login(email, mdp)
             withContext(Dispatchers.Main) {
                 if (token != null) {
                     Log.d("Login", "Succès ! Token reçu : $token")
@@ -54,7 +58,34 @@ class ClubViewModel(private val dbHelper: DatabaseHelper) : ViewModel() {
                     loginError.value = "Erreur de connexion"
                 }
             }
-
         }
+    }
+
+    fun addClub(
+        name: String,
+        street: String,
+        city: String,
+        postalCode: String,
+        description: String,
+        ffsoId: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        // ID temporaire négatif pour éviter les conflits avec les IDs serveur
+        val tempId = -(System.currentTimeMillis().toInt())
+
+        val club = Club(
+            id = tempId,
+            name = name,
+            street = street,
+            city = city,
+            postalCode = postalCode,
+            description = description,
+            ffsoId = ffsoId,
+            isDirty = true
+        )
+
+        dbHelper.addClubLocal(club) // 👈 sauvegarde locale uniquement
+        loadFromLocal()
+        onResult(true) // succès immédiat, pas besoin d'attendre le réseau
     }
 }
