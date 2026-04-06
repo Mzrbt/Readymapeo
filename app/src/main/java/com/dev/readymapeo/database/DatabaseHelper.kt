@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.dev.readymapeo.models.Club
 
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", null, 10) {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "clubs.db", null, 1) {
 
     private val TABLE_CLUBS = "clubs"
     private val COL_ID = "club_id"

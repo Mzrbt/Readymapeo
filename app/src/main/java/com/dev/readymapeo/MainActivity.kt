@@ -72,7 +72,7 @@ fun ReadymapeoApp(viewModel: ClubViewModel) {
         when (currentDestination) {
             AppDestinations.HOME -> ClubListScreen(viewModel)
             AppDestinations.FAVORITES -> AddClubForm(viewModel)
-            AppDestinations.PROFILE -> AuthForm(viewModel)
+            AppDestinations.PROFILE -> AuthForm(viewModel, onNavigateToClubs = {currentDestination = AppDestinations.HOME})
         }
 
     }

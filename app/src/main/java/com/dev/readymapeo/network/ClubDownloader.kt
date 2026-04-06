@@ -9,7 +9,7 @@ import java.net.URL
 
 class ClubDownloader {
     private val TAG = "ClubDownloader"
-    private val API_BASE_URL = "http://10.0.2.2:8080/api"
+    private val API_BASE_URL = "https://g4-devc3.unicaen.fr/api"
     private val CLUBS_URL = "$API_BASE_URL/clubs"
     private val LOGIN_URL = "$API_BASE_URL/login"
 
