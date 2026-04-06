@@ -13,9 +13,13 @@ class ClubDownloader {
     private val CLUBS_URL = "$API_BASE_URL/clubs"
     private val LOGIN_URL = "$API_BASE_URL/login"
 
+    /**
+     * Récupère la liste des clubs depuis l'API et les enregistre dans la base de données locale.
+     * @param dbHelper L'assistant de base de données pour l'enregistrement.
+     * @return True si la récupération et l'enregistrement ont réussi, false sinon.
+     */
     fun getClubAndAdd(dbHelper: DatabaseHelper): Boolean {
         val jsonString = executeRequest(CLUBS_URL, "GET") ?: return false
-
         return try {
             val jsonArray = JSONObject(jsonString).getJSONObject("data").getJSONArray("data")
             for (i in 0 until jsonArray.length()) {
@@ -37,13 +41,18 @@ class ClubDownloader {
         }
     }
 
+    /**
+     * Tente de connecter l'utilisateur auprès de l'API pour obtenir un jeton d'authentification.
+     * @param email L'adresse email de l'utilisateur.
+     * @param mdp Le mot de passe de l'utilisateur.
+     * @return Le jeton (token) si la connexion réussit, null sinon.
+     */
     fun login(email: String, mdp: String): String? {
         val body = JSONObject().apply {
             put("email", email)
             put("password", mdp)
         }
         val response = executeRequest(LOGIN_URL, "POST", body) ?: return null
-
         return try {
             JSONObject(response).getJSONObject("data").getString("token")
         } catch (e: Exception) {
@@ -52,10 +61,15 @@ class ClubDownloader {
         }
     }
 
+    /**
+     * Envoie les clubs créés localement vers le serveur API.
+     * @param dbHelper L'assistant de base de données pour récupérer les clubs dirty.
+     * @param token Le jeton d'authentification nécessaire pour le POST.
+     * @return True si tous les clubs ont été synchronisés avec succès.
+     */
     fun syncDirtyClubs(dbHelper: DatabaseHelper, token: String): Boolean {
         val dirtyClubs = dbHelper.getDirtyClubs()
         Log.d(TAG, "${dirtyClubs.size} club(s) dirty à synchroniser")
-
         return dirtyClubs.fold(true) { allSuccess, club ->
             val body = JSONObject().apply {
                 put("club_name", club.name)
@@ -72,7 +86,14 @@ class ClubDownloader {
         }
     }
 
-    // 👇 Toutes les requêtes passent ici, toujours en JSON
+    /**
+     * Exécute une requête HTTP générique vers l'API.
+     * @param urlStr L'URL cible de la requête.
+     * @param method La méthode HTTP (GET, POST, etc.).
+     * @param body Le corps de la requête au format JSONObject (optionnel).
+     * @param token Le jeton Bearer pour l'authentification (optionnel).
+     * @return La réponse du serveur sous forme de chaîne de caractères, ou null en cas d'erreur.
+     */
     private fun executeRequest(
         urlStr: String,
         method: String,
@@ -92,12 +113,10 @@ class ClubDownloader {
             connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("X-Requested-With", "XMLHttpRequest")
             token?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
-
             if (method == "POST") {
                 connection.doOutput = true
                 body?.let { connection.outputStream.use { os -> os.write(it.toString().toByteArray()) } }
             }
-
             return when (val code = connection.responseCode) {
                 200, 201 -> connection.inputStream.bufferedReader().use { it.readText() }
                 302 -> """{"status":"success","message":"created"}"""

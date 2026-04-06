@@ -1,6 +1,7 @@
 package com.dev.readymapeo.ui.composable
 
 import ads_mobile_sdk.h6
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
@@ -15,6 +16,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.dev.readymapeo.ui.viewmodels.ClubViewModel
@@ -30,13 +32,33 @@ fun ClubListScreen(viewModel: ClubViewModel, modifier: Modifier = Modifier) {
             Button(onClick = { viewModel.sync() }, modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 Text("Synchroniser (GET)")
             }
+            val syncMessage = viewModel.syncMessage.value
+
+            if (syncMessage != null) {
+                Toast.makeText(LocalContext.current, syncMessage, Toast.LENGTH_LONG).show()
+                viewModel.clearSyncMessage()
+            }
             LazyColumn {
                 items(viewModel.clubs) { club ->
-                    Card(modifier = Modifier.padding(8.dp).fillMaxWidth()) {
+                    Card( /* tes modifiers */ ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(club.name)
-                            Text("${club.postalCode} ${club.city}")
+                            Text(text = club.name) // Affichage normal du club
 
+
+                            if (club.isDirty) {
+                                Text(
+                                    text = "Non synchronisé",
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            else if (club.id < 0) {
+                                Text(
+                                    text = "En attente d'acceptation",
+                                    color = Color.Blue,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
